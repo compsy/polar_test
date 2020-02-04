@@ -1,0 +1,24 @@
+@charset "UTF-8";
+
+$muted-color: #6c757d;
+
+@import 'jsonFormatter';
+
+.text-muted {
+  color: $muted-color !important;
+}
+
+h3 {
+  & > a {
+    @extend .text-muted;
+  }
+}
+
+.team-details, .player-details, .player-session-details {
+  display: none;
+}
+
+pre {
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+}

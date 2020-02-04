@@ -1,0 +1,95 @@
+:javascript
+  const token = '#{@result['access_token']}'
+  const backEndUrl = '/polar_api_v1'
+  function bindDataTrigger(buttonId, url, outputId, cb = null) {
+    $(buttonId).click(() => {
+      $(outputId).html(null)
+      $.ajax({ type: 'POST', url: backEndUrl, data: { url: url(), token: token } })
+      .done((data) => {
+        console.log(data)
+        $(outputId)
+          .html(data)
+          .jsonFormatter()
+        if (cb) cb()
+      })
+      .fail((jqXHR, textStatus) => {
+        console.log('error: request failed')
+        console.log(jqXHR)
+        console.log(textStatus)
+      })
+    })
+  }
+  $(document).ready(() => {
+    M.updateTextFields()
+    $('.formatted-json').jsonFormatter()
+    bindDataTrigger('#list_teams', () => 'teams', '#teams', () => $('.team-details').show())
+    bindDataTrigger('#get_team_details', () => `teams/${$('#team_id').val()}`, '#team_details', () => $('.player-details').show())
+    bindDataTrigger('#get_team_training_sessions', () => `teams/${$('#team_id2').val()}/training_sessions`, '#team_training_sessions')
+    bindDataTrigger('#get_player_training_sessions', () => `players/${$('#player_id').val()}/training_sessions`, '#player_training_sessions', () => $('.player-session-details').show())
+    bindDataTrigger('#get_player_training_session_details', () => `training_sessions/${$('#player_session_id').val()}`, '#player_training_session_details')
+  })
+.container
+  = haml :title
+  - if @result['error']
+    .row
+      .col.s12
+        %h4='Authorization failed!'
+        %p The error was:
+        %p.formatted-json=@result.to_json
+      .col.s12
+        %a.button.waves-effect.waves-light.btn{href: @purl} Refresh the authorization code
+  - else
+    .row
+      .col.s12
+        %h4 Authorization success!
+        %p="Received authorization code: #{@code}"
+      .col.s12
+        %p Exchanged this code for the following access token:
+        %p.formatted-json=@result.to_json
+    .row
+      .col.s12
+        %h4 Teams
+        %button.waves-effect.waves-light.btn#list_teams List teams
+        #teams
+    .team-details
+      .row
+        .input-field.col.s6
+          %input{id: 'team_id', type: 'text'}
+          %label{for: 'team_id'} Team ID
+        .input-field.col.s6
+          %button.waves-effect.waves-light.btn#get_team_details Get team details
+      .row
+        .col.s12
+          #team_details
+      .row
+        .input-field.col.s6
+          %input{id: 'team_id2', type: 'text'}
+          %label{for: 'team_id2'} Team ID
+        .input-field.col.s6
+          %button.waves-effect.waves-light.btn#get_team_training_sessions Get team training sessions
+      .row
+        .col.s12
+          #team_training_sessions
+      .player-details
+        .row
+          .col.s12
+            %h4 Players
+        .row
+          .input-field.col.s6
+            %input{id: 'player_id', type: 'text'}
+            %label{for: 'player_id'} Player ID
+          .input-field.col.s6
+            %button.waves-effect.waves-light.btn#get_player_training_sessions Get player training sessions
+        .row
+          .col.s12
+            #player_training_sessions
+        .player-session-details
+          .row
+            .input-field.col.s6
+              %input{id: 'player_session_id', type: 'text'}
+              %label{for: 'player_session_id'} Player Session ID
+            .input-field.col.s6
+              %button.waves-effect.waves-light.btn#get_player_training_session_details Get player training session details
+          .row
+            .col.s12
+              #player_training_session_details
