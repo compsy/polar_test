@@ -25,7 +25,7 @@
     bindDataTrigger('#list_teams', () => 'teams', '#teams', () => $('.team-details').show())
     bindDataTrigger('#get_team_details', () => `teams/${$('#team_id').val()}`, '#team_details', () => $('.player-details').show())
     bindDataTrigger('#get_team_training_sessions', () => `teams/${$('#team_id2').val()}/training_sessions`, '#team_training_sessions')
-    bindDataTrigger('#get_player_training_sessions', () => `players/${$('#player_id').val()}/training_sessions`, '#player_training_sessions', () => $('.player-session-details').show())
+    bindDataTrigger('#get_player_training_sessions', () => `players/${$('#player_id').val()}/training_sessions?type=ALL`, '#player_training_sessions', () => $('.player-session-details').show())
     bindDataTrigger('#get_player_training_session_details', () => `training_sessions/${$('#player_session_id').val()}`, '#player_training_session_details')
   })
 .container
