@@ -8,7 +8,7 @@ bundle install
 ```
 If bundler isn't installed, you first need to type `gem install bundler`.
 
-There is a file called `config.yml.example`, **rename this file to `config.yml`**. Then edit it and supply your own Client ID and Client Secret, as obtained through [https://admin.polaraccesslink.com/](https://admin.polaraccesslink.com/).
+There is a file called `config.yml.example`, **copy this file to `config.yml`**. Then edit it and supply your own Client ID and Client Secret, as obtained through [https://admin.polaraccesslink.com/](https://admin.polaraccesslink.com/).
 
 ## Running the server
 ```
