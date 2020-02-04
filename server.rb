@@ -6,6 +6,7 @@ require 'httparty'
 HTTParty::Basement.default_options.update(verify: false)
 
 config_file './config.yml'
+set :bind, '0.0.0.0'
 
 get '/callback' do
   @purl = purl
