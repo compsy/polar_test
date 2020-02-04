@@ -23,4 +23,6 @@ rerun server.rb
 to start the server instead.
 
 ## Issues, Problems
-Open an issue at https://github.com/compsy/polar_test/issues
+If there are issues installing gems, delete the file `Gemfile.lock` and then try again.
+
+Otherwise, open an issue at https://github.com/compsy/polar_test/issues
