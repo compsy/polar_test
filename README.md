@@ -1,0 +1,26 @@
+# polar_test
+Polar Team Pro API Test
+
+## Installation
+This project uses the lightweight [Ruby Sinatra](http://sinatrarb.com/) web framework. To install, navigate to the repo directory, then type:
+```
+bundle install
+```
+If bundler isn't installed, you first need to type `gem install bundler`.
+
+There is a file called `config.yml.example`, **rename this file to `config.yml`**. Then edit it and supply your own Client ID and Client Secret, as obtained through [https://admin.polaraccesslink.com/](https://admin.polaraccesslink.com/).
+
+## Running the server
+```
+ruby server.rb
+```
+Starts a server on `http://localhost:4567`.
+
+If you want to edit the code and have the server automatically reload the changes, use:
+```
+rerun server.rb
+```
+to start the server instead.
+
+## Issues, Problems
+Open an issue at https://github.com/compsy/polar_test/issues
