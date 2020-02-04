@@ -2,7 +2,7 @@ GEM
   remote: http://rubygems.org/
   specs:
     backports (3.15.0)
-    ffi (1.12.2-x64-mingw32)
+    ffi (1.12.2)
     haml (5.1.2)
       temple (>= 0.8.0)
       tilt
@@ -50,7 +50,7 @@ GEM
     tilt (2.0.10)
 
 PLATFORMS
-  x64-mingw32
+  ruby
 
 DEPENDENCIES
   haml
@@ -62,4 +62,4 @@ DEPENDENCIES
   sinatra-contrib
 
 BUNDLED WITH
-   2.1.2
+   2.1.4
