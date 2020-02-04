@@ -6,7 +6,6 @@
       $(outputId).html(null)
       $.ajax({ type: 'POST', url: backEndUrl, data: { url: url(), token: token } })
       .done((data) => {
-        console.log(data)
         $(outputId)
           .html(data)
           .jsonFormatter()
