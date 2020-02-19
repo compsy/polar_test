@@ -3,10 +3,13 @@ require 'sinatra/config_file'
 require 'haml'
 require 'pp'
 require 'httparty'
+require 'json'
 HTTParty::Basement.default_options.update(verify: false)
 
 config_file './config.yml'
 set :bind, '0.0.0.0'
+
+PER_PAGE = 100
 
 get '/callback' do
   @purl = purl
@@ -24,6 +27,24 @@ end
 get '/' do
   @purl = purl
   haml :index, layout: :application
+end
+
+get '/export.json' do
+  @token = params[:token]
+  @teams = parse_json_from_api('teams')
+  @result = {}
+  @result['Beloften (O.23) 27-06-2016 - 15-05-2017'] = export_range(team_name: 'FC Groningen o.23', start_date: '2016-06-27', end_date: '2017-05-15')
+  @result['Beloften (O.23) 02-07-2017 - 23-05-2018'] = export_range(team_name: 'FC Groningen o.23', start_date: '2017-07-02', end_date: '2018-05-23')
+  @result['O.17 29-08-2016 - 23-04-2017'] = export_range(team_name: 'FC Groningen O.17', start_date: '2016-08-29', end_date: '2017-04-23')
+  @result['O.17 07-08-2017 - 29-05-2018'] = export_range(team_name: 'FC Groningen O.17', start_date: '2017-08-07', end_date: '2018-05-29')
+  @result['O.19 29-08-2016 - 23-04-2017'] = export_range(team_name: 'FC Groningen O.19', start_date: '2016-08-29', end_date: '2017-04-23')
+  @result['O.19 07-08-2017 - 29-05-2018'] = export_range(team_name: 'FC Groningen O.19', start_date: '2017-08-07', end_date: '2018-05-29')
+  # test:
+  # @result['O.17 29-08-2016 - 23-04-2017'] = export_range(team_name: 'FC Groningen O.17', start_date: '2019-08-29', end_date: '2020-01-01')
+  File.open('export.json', 'w') do |f|
+    f.puts @result.to_json
+  end
+  json @result
 end
 
 post '/polar_api_v1' do
@@ -55,4 +76,68 @@ def read_from_api(params)
                  'Accept' => 'application/json',
                  'Authorization' => "Bearer #{params[:token]}",
                })
+end
+
+def parse_json_from_api(url)
+  @bucket ||= 50
+  @bucket -= 1
+  sleep(1) if @bucket.negative?
+  JSON.parse(read_from_api(url: url, token: @token).body)
+end
+
+def paginate_all_data(url:, more_params: nil)
+  query_params = "since=#{@start_date}&until=#{@end_date}#{more_params ? "&#{more_params}" : ''}"
+  total_count = parse_json_from_api("#{url}?#{query_params}")['page']['total_elements']
+  puts "total count: #{total_count}"
+  idx = 0
+  result = []
+  while idx*PER_PAGE < total_count
+    result += parse_json_from_api("#{url}?page=#{idx}&per_page=#{PER_PAGE}&#{query_params}")['data']
+    idx += 1
+  end
+  puts "ERROR: result.length #{result.length} != total_count #{total_count}" if (result.length != total_count)
+  result
+end
+
+def export_range(team_name:, start_date:, end_date:)
+  @start_date = format_date(start_date)
+  @end_date = format_date(end_date)
+  @team_id = team_id(team_name)
+
+  { team_training_sessions: team_training_sessions, team_details: team_details }
+end
+
+def format_date(date_string)
+  "#{date_string}T00:00:00Z"
+end
+
+def team_id(team_name)
+  @teams['data'].select{|team| team['name'] == team_name}.first['id']
+end
+
+def team_training_sessions
+  paginate_all_data(url: "teams/#{@team_id}/training_sessions")
+end
+
+def team_details
+  team_details = parse_json_from_api("teams/#{@team_id}")['data']
+  @players = team_details['players']
+  { team_details: team_details, player_training_sessions: players_training_sessions }
+end
+
+def players_training_sessions
+  result = {}
+  @players.each do |player|
+    @player_id = player['player_id']
+    result[@player_id] = player_training_sessions
+  end
+  result
+end
+
+def player_training_sessions
+  data = paginate_all_data(url: "players/#{@player_id}/training_sessions", more_params: 'type=ALL')
+  data.map do |entry|
+    entry['details'] = parse_json_from_api("training_sessions/#{entry['id']}")['data']
+    entry
+  end
 end

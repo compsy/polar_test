@@ -47,6 +47,10 @@
         %p.formatted-json=@result.to_json
     .row
       .col.s12
+        %h4 Export
+        %a{href: "/export.json?token=#{@result['access_token']}", target: '_blank'} Download export
+    .row
+      .col.s12
         %h4 Teams
         %button.waves-effect.waves-light.btn#list_teams List teams
         #teams
