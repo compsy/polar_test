@@ -65,7 +65,7 @@ get '/export_17_feb.json' do
   @token = params[:token]
   @teams = parse_json_from_api('teams')
   @result = {}
-  export_range(team_name: 'Eerste selectie', start_date: '16-02-2019', end_date: '18-02-2019')
+  export_range(team_name: 'Eerste selectie', start_date: '16-02-2020', end_date: '18-02-2020')
   write_and_return_result(filename: 'export_17_feb.json')
 end
 
@@ -154,8 +154,7 @@ end
 def team_training_sessions
   data = paginate_all_data(url: "teams/#{@team_id}/training_sessions")
   data.map do |entry|
-    entry['details'] = parse_json_from_api("teams/training_sessions/#{entry['id']}")['data']
-    entry
+    entry.merge!(parse_json_from_api("teams/training_sessions/#{entry['id']}")['data'])
   end
 end
 
