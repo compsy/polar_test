@@ -16,13 +16,13 @@ set :bind, '0.0.0.0'
 PER_PAGE = 100
 DATE_FORMAT = '%d-%m-%Y'
 
+class MyApiError < StandardError
+end
+
 # Exports
 
 get '/export_all.json' do
-  @token = params[:token]
-  @teams = parse_json_from_api('teams')
-  @result = {}
-  @samples = ''
+  initialize_instance_variables
   export_range(team_name: 'FC Groningen o.23', start_date: '27-06-2016', end_date: '15-05-2017')
   export_range(team_name: 'FC Groningen o.23', start_date: '02-07-2017', end_date: '23-05-2018')
   export_range(team_name: 'FC Groningen O.17', start_date: '29-08-2016', end_date: '23-04-2017')
@@ -33,20 +33,14 @@ get '/export_all.json' do
 end
 
 get '/export_range_that_has_data.json' do
-  @token = params[:token]
-  @teams = parse_json_from_api('teams')
-  @result = {}
-  @samples = ''
+  initialize_instance_variables
   export_range(team_name: 'FC Groningen O.17', start_date: '29-08-2019', end_date: '01-01-2020')
   write_and_return_result(filename: 'export_range_that_has_data.json')
 end
 
 get '/export_17_feb.json' do
-  @token = params[:token]
-  @teams = parse_json_from_api('teams')
-  @result = {}
+  initialize_instance_variables
   # @samples = '?samples=all'
-  @samples = ''
   export_range(team_name: 'Eerste selectie', start_date: '17-02-2020', end_date: '18-02-2020')
   write_and_return_result(filename: 'export_17_feb.json')
 end
@@ -74,6 +68,13 @@ post '/polar_api_v1' do
 end
 
 private
+
+def initialize_instance_variables
+  @token = params[:token]
+  @teams = parse_json_from_api('teams')
+  @result = {}
+  @samples = ''
+end
 
 def purl
   "https://auth.polar.com/oauth/authorize?client_id=#{settings.client_id}&response_type=code&scope=team_read"
@@ -104,7 +105,12 @@ def parse_json_from_api(url)
   @bucket ||= 50
   @bucket -= 1
   sleep(1) if @bucket.negative?
-  JSON.parse(read_from_api(url: url, token: @token).body)
+  result = JSON.parse(read_from_api(url: url, token: @token).body)
+  return result if result['error'].blank?
+
+  error_message = "ERROR retrieving #{url}: \n#{result['error'].pretty_inspect}"
+  puts error_message
+  raise MyApiError, error_message
 end
 
 def paginate_all_data(url:, more_params: nil)
@@ -119,6 +125,8 @@ def paginate_all_data(url:, more_params: nil)
   end
   puts "ERROR: result.length #{result.length} != total_count #{total_count}" if result.length != total_count
   result
+rescue MyApiError
+  []
 end
 
 def export_range(team_name:, start_date:, end_date:)
@@ -141,9 +149,13 @@ def export_range_aux(team_name:, start_date:, end_date:)
   @start_date = format_date(start_date)
   @end_date = format_date(end_date)
   @team_id = team_id(team_name)
+  @player_number_mapping = {}
+  @player_id_mapping = {}
+  @player_ids = []
   {
+    team_details: team_details,
     team_training_sessions: team_training_sessions,
-    team_details: team_details
+    player_training_sessions: players_training_sessions
   }
 end
 
@@ -159,22 +171,47 @@ def team_training_sessions
   data = paginate_all_data(url: "teams/#{@team_id}/training_sessions")
   data.map do |entry|
     entry.merge!(parse_json_from_api("teams/training_sessions/#{entry['id']}")['data'])
+    entry['participants'].each do |participant|
+      @player_ids << participant['player_id'] unless @player_ids.include?(participant['player_id'])
+      augment_participant_data(participant)
+    end
+    entry
   end
 end
 
+def augment_participant_data(participant)
+  participant['possible_player_matches'] = []
+  participant['possible_player_matches'] += @player_id_mapping[participant['player_id']] || []
+  participant['possible_player_matches'] += @player_number_mapping[participant['player_number']] || []
+  participant['possible_player_matches'].uniq!
+  participant['player_session'] = parse_json_from_api(
+    "training_sessions/#{participant['player_session_id']}"
+  )['data']
+end
+
 def team_details
-  team_details = parse_json_from_api("teams/#{@team_id}")['data']
-  @players = team_details['players']
-  {
-    team_details: team_details,
-    player_training_sessions: players_training_sessions
-  }
+  cteam_details = parse_json_from_api("teams/#{@team_id}")['data']
+  @players = cteam_details['players']
+  create_player_mappings
+  cteam_details
+  # {
+  #  team_details: team_details,
+  #  player_training_sessions: players_training_sessions
+  # }
+end
+
+def create_player_mappings
+  @players.each do |player|
+    @player_ids << player['player_id']
+    (@player_number_mapping[player['player_number']] ||= []) << player
+    (@player_id_mapping[player['player_id']] ||= []) << player
+  end
 end
 
 def players_training_sessions
   result = {}
-  @players.each do |player|
-    @player_id = player['player_id']
+  @player_ids.each do |player_id|
+    @player_id = player_id
     result[@player_id] = player_training_sessions
   end
   result
