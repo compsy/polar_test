@@ -16,28 +16,6 @@ set :bind, '0.0.0.0'
 PER_PAGE = 100
 DATE_FORMAT = '%d-%m-%Y'
 
-get '/callback' do
-  @purl = purl
-  @code = params[:code]
-  @result = JSON.parse(retrieve_tokens(grant_type: 'authorization_code', code: @code).body)
-  haml :callback, layout: :application
-end
-
-get '/stylesheets/*.css' do
-  content_type 'text/css', charset: 'utf-8'
-  filename = params[:splat].first
-  scss filename.to_sym, views: './stylesheets'
-end
-
-get '/' do
-  @purl = purl
-  haml :index, layout: :application
-end
-
-post '/polar_api_v1' do
-  json read_from_api(params).body
-end
-
 # Exports
 
 get '/export_all.json' do
@@ -67,6 +45,28 @@ get '/export_17_feb.json' do
   @result = {}
   export_range(team_name: 'Eerste selectie', start_date: '16-02-2020', end_date: '18-02-2020')
   write_and_return_result(filename: 'export_17_feb.json')
+end
+
+get '/callback' do
+  @purl = purl
+  @code = params[:code]
+  @result = JSON.parse(retrieve_tokens(grant_type: 'authorization_code', code: @code).body)
+  haml :callback, layout: :application
+end
+
+get '/stylesheets/*.css' do
+  content_type 'text/css', charset: 'utf-8'
+  filename = params[:splat].first
+  scss filename.to_sym, views: './stylesheets'
+end
+
+get '/' do
+  @purl = purl
+  haml :index, layout: :application
+end
+
+post '/polar_api_v1' do
+  json read_from_api(params).body
 end
 
 private
