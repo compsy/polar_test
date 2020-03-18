@@ -1,4 +1,6 @@
-source "http://rubygems.org"
+# frozen_string_literal: true
+
+source 'http://rubygems.org'
 
 gem 'rake'
 
@@ -12,3 +14,5 @@ gem 'rerun'
 gem 'httparty'
 
 gem 'sass'
+
+gem 'activesupport'
