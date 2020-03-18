@@ -22,6 +22,7 @@ get '/export_all.json' do
   @token = params[:token]
   @teams = parse_json_from_api('teams')
   @result = {}
+  @samples = ''
   export_range(team_name: 'FC Groningen o.23', start_date: '27-06-2016', end_date: '15-05-2017')
   export_range(team_name: 'FC Groningen o.23', start_date: '02-07-2017', end_date: '23-05-2018')
   export_range(team_name: 'FC Groningen O.17', start_date: '29-08-2016', end_date: '23-04-2017')
@@ -35,6 +36,7 @@ get '/export_range_that_has_data.json' do
   @token = params[:token]
   @teams = parse_json_from_api('teams')
   @result = {}
+  @samples = ''
   export_range(team_name: 'FC Groningen O.17', start_date: '29-08-2019', end_date: '01-01-2020')
   write_and_return_result(filename: 'export_range_that_has_data.json')
 end
@@ -43,7 +45,9 @@ get '/export_17_feb.json' do
   @token = params[:token]
   @teams = parse_json_from_api('teams')
   @result = {}
-  export_range(team_name: 'Eerste selectie', start_date: '16-02-2020', end_date: '18-02-2020')
+  # @samples = '?samples=all'
+  @samples = ''
+  export_range(team_name: 'Eerste selectie', start_date: '17-02-2020', end_date: '18-02-2020')
   write_and_return_result(filename: 'export_17_feb.json')
 end
 
@@ -179,6 +183,6 @@ end
 def player_training_sessions
   data = paginate_all_data(url: "players/#{@player_id}/training_sessions", more_params: 'type=ALL')
   data.map do |entry|
-    entry.merge!(parse_json_from_api("training_sessions/#{entry['id']}")['data'])
+    entry.merge!(parse_json_from_api("training_sessions/#{entry['id']}#{@samples}")['data'])
   end
 end
