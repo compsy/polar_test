@@ -33,13 +33,14 @@ get '/export.json' do
   @token = params[:token]
   @teams = parse_json_from_api('teams')
   @result = {}
-  @result['Beloften (O.23) 27-06-2016 - 15-05-2017'] = export_range(team_name: 'FC Groningen o.23', start_date: '2016-06-27', end_date: '2017-05-15')
-  @result['Beloften (O.23) 02-07-2017 - 23-05-2018'] = export_range(team_name: 'FC Groningen o.23', start_date: '2017-07-02', end_date: '2018-05-23')
-  @result['O.17 29-08-2016 - 23-04-2017'] = export_range(team_name: 'FC Groningen O.17', start_date: '2016-08-29', end_date: '2017-04-23')
-  @result['O.17 07-08-2017 - 29-05-2018'] = export_range(team_name: 'FC Groningen O.17', start_date: '2017-08-07', end_date: '2018-05-29')
-  @result['O.19 29-08-2016 - 23-04-2017'] = export_range(team_name: 'FC Groningen O.19', start_date: '2016-08-29', end_date: '2017-04-23')
-  @result['O.19 07-08-2017 - 29-05-2018'] = export_range(team_name: 'FC Groningen O.19', start_date: '2017-08-07', end_date: '2018-05-29')
-  # test:
+  # export_all.json:
+  # @result['Beloften (O.23) 27-06-2016 - 15-05-2017'] = export_range(team_name: 'FC Groningen o.23', start_date: '2016-06-27', end_date: '2017-05-15')
+  # @result['Beloften (O.23) 02-07-2017 - 23-05-2018'] = export_range(team_name: 'FC Groningen o.23', start_date: '2017-07-02', end_date: '2018-05-23')
+  # @result['O.17 29-08-2016 - 23-04-2017'] = export_range(team_name: 'FC Groningen O.17', start_date: '2016-08-29', end_date: '2017-04-23')
+  # @result['O.17 07-08-2017 - 29-05-2018'] = export_range(team_name: 'FC Groningen O.17', start_date: '2017-08-07', end_date: '2018-05-29')
+  # @result['O.19 29-08-2016 - 23-04-2017'] = export_range(team_name: 'FC Groningen O.19', start_date: '2016-08-29', end_date: '2017-04-23')
+  # @result['O.19 07-08-2017 - 29-05-2018'] = export_range(team_name: 'FC Groningen O.19', start_date: '2017-08-07', end_date: '2018-05-29')
+  # export_range_that_has_data.json:
   # @result['O.17 29-08-2016 - 23-04-2017'] = export_range(team_name: 'FC Groningen O.17', start_date: '2019-08-29', end_date: '2020-01-01')
   File.open('export.json', 'w') do |f|
     f.puts @result.to_json

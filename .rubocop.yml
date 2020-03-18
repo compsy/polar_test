@@ -1,0 +1,71 @@
+inherit_from: rubocop-todo.yml
+require:
+  - rubocop-performance
+  - rubocop-rails
+
+AllCops:
+  TargetRubyVersion: 2.6
+
+# Use UTF-8 as the source file encoding.
+Style/Encoding:
+  Enabled: false
+
+# Limit lines to 80 characters.
+Layout/LineLength:
+  Max: 120
+
+Layout/EndOfLine:
+  EnforcedStyle: lf
+
+Style/HashEachMethods:
+  Enabled: false
+
+Style/HashTransformKeys:
+  Enabled: false
+
+Style/HashTransformValues:
+  Enabled: false
+
+# Default is 5
+Metrics/ParameterLists:
+  Max: 6
+
+# Avoid methods longer than 10 lines of code
+Metrics/MethodLength:
+  CountComments: false  # count full line comments?
+  Max: 20
+
+# Limit modules to have a length of 768
+Metrics/ModuleLength:
+  Max: 768
+  Exclude:
+    - 'spec/**/*'
+
+# We think it's okay to use instance variables in helper classes. We may choose to refactor these
+# and remove this assertion at a later date.
+Rails/HelperInstanceVariable:
+  Exclude:
+    - 'app/helpers/**/*'
+
+# Describe specs fail this test
+# Namespaces in rake tasks do too
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - '**/*.rake'
+
+# Limit classes to have a length of 768
+Metrics/ClassLength:
+  Max: 768
+
+
+################################################################## DISABLED COPS
+# These cops are disabled because we think they are a Bad Idea. If you add one
+# here, make sure to add a comment describing what the cop does, and why this
+# is a bad idea.
+
+# Forces the argument names of the block given to #reduce to be `a, e`. Only
+# applies on single-line blocks, but why would we want to force people to use
+# less descriptive names?
+Style/Documentation:
+  Enabled: false
