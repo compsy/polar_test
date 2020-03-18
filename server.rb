@@ -138,8 +138,8 @@ def export_range_aux(team_name:, start_date:, end_date:)
   @end_date = format_date(end_date)
   @team_id = team_id(team_name)
   {
-    team_training_sessions: team_training_sessions
-    # team_details: team_details
+    team_training_sessions: team_training_sessions,
+    team_details: team_details
   }
 end
 
@@ -179,7 +179,6 @@ end
 def player_training_sessions
   data = paginate_all_data(url: "players/#{@player_id}/training_sessions", more_params: 'type=ALL')
   data.map do |entry|
-    entry['details'] = parse_json_from_api("training_sessions/#{entry['id']}")['data']
-    entry
+    entry.merge!(parse_json_from_api("training_sessions/#{entry['id']}")['data'])
   end
 end
