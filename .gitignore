@@ -1,8 +1,8 @@
 polar_test/config.yml
 polar_test/.sass-cache
 polar_test/.idea
-polar_test/*.json
+polar_test/exports/*.json
 config.yml
 .sass-cache
 .idea
-*.json
+exports/*.json
