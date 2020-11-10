@@ -38,11 +38,17 @@ get '/export_range_that_has_data.json' do
   write_and_return_result(filename: 'export_range_that_has_data.json')
 end
 
-get '/export_17_feb.json' do
+get '/export_9_nov.json' do
   initialize_instance_variables
-  # @samples = '?samples=all'
-  export_range(team_name: 'Eerste selectie', start_date: '17-02-2020', end_date: '18-02-2020')
-  write_and_return_result(filename: 'export_17_feb.json')
+  export_range(team_name: "FC Groningen o21", start_date: '09-11-2020', end_date: '10-11-2020')
+  write_and_return_result(filename: 'export_9_nov.json')
+end
+
+get '/export_9_nov_all_samples.json' do
+  initialize_instance_variables
+  @samples = '?samples=all' # Don't use this, it's 78MB just for a single day.
+  export_range(team_name: "FC Groningen o21", start_date: '09-11-2020', end_date: '10-11-2020')
+  write_and_return_result(filename: 'export_9_nov_all_samples.json')
 end
 
 get '/callback' do

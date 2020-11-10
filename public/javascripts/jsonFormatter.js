@@ -1,4 +1,4 @@
-// jQuery Plugin that converts a JSON string into an HTML formatted string with 
+// jQuery Plugin that converts a JSON string into an HTML formatted string with
 // optionally collapsible members.
 //
 // Based on example from http://bodurov.com/JsonFormatter/.
