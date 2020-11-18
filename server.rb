@@ -32,6 +32,14 @@ get '/export_all.json' do
   write_and_return_result(filename: 'export_all.json')
 end
 
+get '/export_all_new.json' do
+  initialize_instance_variables
+  export_range(team_name: 'FC Groningen o21', start_date: '07-09-2020', end_date: '02-10-2020')
+  export_range(team_name: 'FC Groningen o18', start_date: '07-09-2020', end_date: '02-10-2020')
+  export_range(team_name: 'FC Groningen o16', start_date: '07-09-2020', end_date: '02-10-2020')
+  write_and_return_result(filename: 'export_all_new.json')
+end
+
 get '/export_range_that_has_data.json' do
   initialize_instance_variables
   export_range(team_name: 'FC Groningen O.17', start_date: '29-08-2019', end_date: '01-01-2020')
