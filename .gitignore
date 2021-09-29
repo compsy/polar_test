@@ -6,3 +6,4 @@ config.yml
 .sass-cache
 .idea
 exports/*.json
+exports/*/*.json

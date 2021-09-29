@@ -152,7 +152,6 @@ end
 def parse_json_from_api(url)
   @bucket ||= 50
   @bucket -= 1
-  puts @bucket
   sleep(1) if @bucket.negative?
   last_error_code = 429
   result = nil
@@ -237,12 +236,17 @@ def team_id(team_name)
   (@teams['data'].find { |team| team['name'] == team_name })['id']
 end
 
+def myput(str)
+  print str
+  $stdout.flush
+end
+
 def team_training_sessions
   data = paginate_all_data(url: "teams/#{@team_id}/training_sessions")
   idx = 0
   data.map do |entry|
     idx += 1
-    put "team #{@team_name} #{idx}/#{data.size} "
+    puts "team #{@team_name} #{idx}/#{data.size}."
     entry.merge!(parse_json_from_api("teams/training_sessions/#{entry['id']}")['data'])
     entry['participants'].each do |participant|
       @player_ids << participant['player_id'] unless @player_ids.include?(participant['player_id'])
@@ -270,22 +274,21 @@ end
 def players_training_sessions
   result = {}
   @player_ids.each_with_index do |player_id, idx|
-    @player_id = player_id
-    put "players #{idx + 1}/#{@player_ids.size}. "
-    p_training_sessions = player_training_sessions
+    myput "players #{idx + 1}/#{@player_ids.size}. "
+    p_training_sessions = player_training_sessions(player_id)
     # only export players that have player training sessions
-    next if p_training_sessions.blank? && @player_id_mapping[@player_id].present?
+    next if p_training_sessions.blank? && @player_id_mapping[player_id].present?
 
-    result[@player_id] = {
-      player: @player_id_mapping[@player_id],
+    result[player_id] = {
+      player: @player_id_mapping[player_id],
       player_training_sessions: p_training_sessions
     }
   end
   result
 end
 
-def player_training_sessions
-  data = paginate_all_data(url: "players/#{@player_id}/training_sessions", more_params: 'type=ALL')
+def player_training_sessions(player_id)
+  data = paginate_all_data(url: "players/#{player_id}/training_sessions", more_params: 'type=ALL')
   data.map do |entry|
     entry.merge!(parse_json_from_api("training_sessions/#{entry['id']}#{@samples}")['data'])
   end
