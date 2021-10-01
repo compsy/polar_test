@@ -29,8 +29,6 @@ get '/export_all.json' do
   export_range(team_name: 'FC Groningen O.17', start_date: '07-08-2017', end_date: '29-05-2018')
   export_range(team_name: 'FC Groningen O.19', start_date: '29-08-2016', end_date: '23-04-2017')
   export_range(team_name: 'FC Groningen O.19', start_date: '07-08-2017', end_date: '29-05-2018')
-  # NOTE: this is players from ALL teams (because we no longer know in which team someone is)
-  export_player_training_sessions(start_date: '29-08-2016', end_date: '29-05-2018')
   write_and_return_result(filename: 'export_all.json')
 end
 
@@ -39,21 +37,18 @@ get '/export_all_new.json' do
   export_range(team_name: 'FC Groningen o21', start_date: '07-09-2020', end_date: '02-10-2020')
   export_range(team_name: 'FC Groningen o18', start_date: '07-09-2020', end_date: '02-10-2020')
   export_range(team_name: 'FC Groningen o16', start_date: '07-09-2020', end_date: '02-10-2020')
-  export_player_training_sessions(start_date: '07-09-2020', end_date: '02-10-2020')
   write_and_return_result(filename: 'export_all_new.json')
 end
 
 get '/export_range_that_has_data.json' do
   initialize_instance_variables
   export_range(team_name: 'FC Groningen O.17', start_date: '29-08-2019', end_date: '01-01-2020')
-  export_player_training_sessions(start_date: '29-08-2019', end_date: '01-01-2020')
   write_and_return_result(filename: 'export_range_that_has_data.json')
 end
 
 get '/export_9_nov.json' do
   initialize_instance_variables
   export_range(team_name: 'FC Groningen o21', start_date: '09-11-2020', end_date: '10-11-2020')
-  export_player_training_sessions(start_date: '09-11-2020', end_date: '10-11-2020')
   write_and_return_result(filename: 'export_9_nov.json')
 end
 
@@ -61,7 +56,6 @@ get '/export_9_nov_all_samples.json' do
   initialize_instance_variables
   @samples = '?samples=all' # Don't use this, it's 78MB just for a single day.
   export_range(team_name: 'FC Groningen o21', start_date: '09-11-2020', end_date: '10-11-2020')
-  export_player_training_sessions(start_date: '09-11-2020', end_date: '10-11-2020')
   write_and_return_result(filename: 'export_9_nov_all_samples.json')
 end
 
@@ -163,27 +157,29 @@ def parse_json_from_api(url)
     # Sleep a minute if we get a too many requests error but keep trying
     sleep(60) if last_error_code == 429
   end
-  error_message = "ERROR retrieving #{url}: \n#{result['error'].pretty_inspect}"
+  error_message = "[#{Time.new.strftime('%k:%M')}] ERROR retrieving #{url}: \n#{result['error'].pretty_inspect}"
   puts error_message
   raise MyApiError, error_message
 end
 # rubocop:enable Metrics/AbcSize
 
+# rubocop:disable Metrics/AbcSize
 def paginate_all_data(url:, more_params: nil)
   query_params = "since=#{@start_date}&until=#{@end_date}#{more_params ? "&#{more_params}" : ''}"
   total_count = parse_json_from_api("#{url}?#{query_params}")['page']['total_elements']
-  puts "total count for #{url}?#{query_params}: #{total_count}"
+  puts "[#{Time.new.strftime('%k:%M')}] total count for #{url}?#{query_params}: #{total_count}"
   idx = 0
   result = []
   while idx * PER_PAGE < total_count
     result += parse_json_from_api("#{url}?page=#{idx}&per_page=#{PER_PAGE}&#{query_params}")['data']
     idx += 1
   end
-  puts "ERROR: result.length #{result.length} != total_count #{total_count}" if result.length != total_count
+  puts "[#{Time.new.strftime('%k:%M')}] ERROR: result.length #{result.length} != total_count #{total_count}" if result.length != total_count
   result
 rescue MyApiError
   []
 end
+# rubocop:enable Metrics/AbcSize
 
 def export_range(team_name:, start_date:, end_date:)
   dstart_date = Date.strptime(start_date, DATE_FORMAT)
@@ -192,22 +188,6 @@ def export_range(team_name:, start_date:, end_date:)
   @result[key] = export_range_aux(team_name: team_name,
                                   start_date: dstart_date.to_s(:db),
                                   end_date: dend_date.to_s(:db))
-end
-
-def export_player_training_sessions(start_date:, end_date:)
-  dstart_date = Date.strptime(start_date, DATE_FORMAT)
-  dend_date = Date.strptime(end_date, DATE_FORMAT)
-  key = "player training sessions #{dstart_date.strftime(DATE_FORMAT)} - #{dend_date.strftime(DATE_FORMAT)}"
-  @result[key] = export_player_training_sessions_aux(start_date: dstart_date.to_s(:db),
-                                                     end_date: dend_date.to_s(:db))
-end
-
-def export_player_training_sessions_aux(start_date:, end_date:)
-  @start_date = format_date(start_date)
-  @end_date = format_date(end_date)
-  {
-    player_training_sessions: players_training_sessions
-  }
 end
 
 def write_and_return_result(filename:)
@@ -241,12 +221,13 @@ def myput(str)
   $stdout.flush
 end
 
+# rubocop:disable Metrics/AbcSize
 def team_training_sessions
   data = paginate_all_data(url: "teams/#{@team_id}/training_sessions")
   idx = 0
   data.map do |entry|
     idx += 1
-    puts "team #{@team_name} #{idx}/#{data.size}."
+    puts "[#{Time.new.strftime('%k:%M')}] team #{@team_name} #{idx}/#{data.size}."
     entry.merge!(parse_json_from_api("teams/training_sessions/#{entry['id']}")['data'])
     entry['participants'].each do |participant|
       @player_ids << participant['player_id'] unless @player_ids.include?(participant['player_id'])
@@ -255,6 +236,7 @@ def team_training_sessions
     entry
   end
 end
+# rubocop:enable Metrics/AbcSize
 
 def augment_participant_data(participant)
   participant['possible_player_matches'] = []
@@ -265,31 +247,11 @@ def augment_participant_data(participant)
   participant['player_session'] = parse_json_from_api(
     "training_sessions/#{participant['player_session_id']}"
   )['data']
+  participant['player_session_trimmed'] = parse_json_from_api(
+    "training_sessions/#{participant['player_session_id']}/session_summary"
+  )['data']
 end
 
 def team_details
   parse_json_from_api("teams/#{@team_id}")['data']
-end
-
-def players_training_sessions
-  result = {}
-  @player_ids.each_with_index do |player_id, idx|
-    myput "players #{idx + 1}/#{@player_ids.size}. "
-    p_training_sessions = player_training_sessions(player_id)
-    # only export players that have player training sessions
-    next if p_training_sessions.blank? && @player_id_mapping[player_id].present?
-
-    result[player_id] = {
-      player: @player_id_mapping[player_id],
-      player_training_sessions: p_training_sessions
-    }
-  end
-  result
-end
-
-def player_training_sessions(player_id)
-  data = paginate_all_data(url: "players/#{player_id}/training_sessions", more_params: 'type=ALL')
-  data.map do |entry|
-    entry.merge!(parse_json_from_api("training_sessions/#{entry['id']}#{@samples}")['data'])
-  end
 end
