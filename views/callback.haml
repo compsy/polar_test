@@ -50,6 +50,10 @@
       .col.s12
         %h4 Export
         %p
+          %a{href: "/export_RecentlyAdjusted.json?token=#{@result['access_token']}", target: '_blank'} Download export_RecentlyAdjusted.json
+        %p
+          %a{href: "/export_all_2020_2021.json?token=#{@result['access_token']}", target: '_blank'} Download export_all_2020_2021.json
+        %p
           %a{href: "/export_all.json?token=#{@result['access_token']}", target: '_blank'} Download export_all.json
         %p
           %a{href: "/export_all_new.json?token=#{@result['access_token']}", target: '_blank'} Download export_all_new.json

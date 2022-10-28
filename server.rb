@@ -20,6 +20,38 @@ class MyApiError < StandardError
 end
 
 # Exports
+################################################################################
+# This is the one.
+# Make sure to check that there are no unassigned players on https://teampro.polar.com/
+get '/export_RecentlyAdjusted.json' do
+  initialize_instance_variables
+  #export_range(team_name: 'FC Groningen o16', start_date: '26-01-2022', end_date: '21-06-2022') # DONE
+  #export_range(team_name: 'FC Groningen o18', start_date: '26-01-2022', end_date: '21-06-2022') # DONE
+  #export_range(team_name: 'FC Groningen o21', start_date: '26-01-2022', end_date: '21-06-2022') # DONE
+  #export_range(team_name: 'OUD FC Groningen o.23', start_date: '26-01-2022', end_date: '21-06-2022')# DONE, maar leeg
+  #export_range(team_name: 'OUD FC Groningen o.23 (2)', start_date: '26-01-2022', end_date: '21-06-2022')# DONE, maar leeg
+  #export_range(team_name: 'OUD FC GRONINGEN O.23 (3)', start_date: '26-01-2022', end_date: '21-06-2022') # DONE, maar leeg
+  
+  #export_range(team_name: 'FC Groningen o16', start_date: '11-11-2021', end_date: '26-01-2022') # DONE
+  #export_range(team_name: 'FC Groningen o18', start_date: '11-11-2021', end_date: '26-01-2022') # DONE
+  #export_range(team_name: 'FC Groningen o21', start_date: '11-11-2021', end_date: '26-01-2022') # DONE
+  #export_range(team_name: 'OUD FC Groningen o.23', start_date: '11-11-2021', end_date: '26-01-2022') # DONE, maar leeg
+  #export_range(team_name: 'OUD FC Groningen o.23 (2)', start_date: '11-11-2021', end_date: '26-01-2022') # DONE, maar leeg
+  #export_range(team_name: 'OUD FC GRONINGEN O.23 (3)', start_date: '11-11-2021', end_date: '26-01-2022') # DONE, maar leeg
+  
+  export_range(team_name: 'Eerste selectie', start_date: '11-11-2021', end_date: '21-06-2022') # DONE
+  write_and_return_result(filename: 'export_11112021_21062022_eerste.json')
+end
+get '/export_all_2020_2021.json' do
+  initialize_instance_variables
+  export_range(team_name: 'FC Groningen o16', start_date: '08-09-2020', end_date: '22-05-2021')
+  export_range(team_name: 'FC Groningen o18', start_date: '08-09-2020', end_date: '22-05-2021')
+  export_range(team_name: 'FC Groningen o21', start_date: '08-09-2020', end_date: '22-05-2021')
+  export_range(team_name: 'OUD FC Groningen o.23', start_date: '08-09-2020', end_date: '22-05-2021')
+  export_range(team_name: 'OUD FC Groningen o.23 (2)', start_date: '08-09-2020', end_date: '22-05-2021')
+  write_and_return_result(filename: 'export_all_2020_2021.json')
+end
+################################################################################
 
 get '/export_all.json' do
   initialize_instance_variables
